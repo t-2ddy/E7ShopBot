@@ -3,10 +3,11 @@ import io
 import re
 import sys
 import win32gui
-from PIL import ImageGrab
 import winsdk.windows.media.ocr as wocr
 import winsdk.windows.graphics.imaging as wgi
 import winsdk.windows.storage.streams as wss
+
+from ocr import _capture_window
 
 WINDOW_TITLE = "Epic Seven"
 WINDOW_CLASS = "GLFW30"
@@ -18,11 +19,8 @@ async def main():
         print(f"ERROR: window not found (class={WINDOW_CLASS!r}, title={WINDOW_TITLE!r})")
         sys.exit(1)
 
-    cl, ct = win32gui.ClientToScreen(hwnd, (0, 0))
-    _, _, cw, ch = win32gui.GetClientRect(hwnd)
-    mid_x = cl + cw // 2
-
-    img = ImageGrab.grab(bbox=(mid_x, ct, cl + cw, ct + ch))
+    # Capture the right half of the client area (rx1=0.5 → rx2=1.0)
+    img = _capture_window(hwnd, 0.5, 0.0, 1.0, 1.0)
     img.save("capture.png")
     print("Screenshot saved to capture.png")
 

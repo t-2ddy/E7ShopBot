@@ -7,8 +7,8 @@ COORD_REFRESH_CONFIRM = (0.6,  0.65)
 COORD_BUY_CONFIRM     = (0.6,  0.7)
 
 # X position of the in-game Buy button to the right of each item row.
-# TODO: calibrate from a live screenshot — see actions.py do_buy() for details.
-BUY_BUTTON_RX = 0.88
+# Calibrated via test_buy.py.
+BUY_BUTTON_RX = 0.9
 
 # OCR scan region (relative to client area)
 OCR_RX1, OCR_RY1 = 0.0, 0.0
