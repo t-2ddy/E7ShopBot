@@ -1,6 +1,6 @@
 # auto-shop
 
-e7shop2/
+auto-shop/
 
 ├── config.py    — all tunable constants (coords, timing, keywords)
 
