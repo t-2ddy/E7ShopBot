@@ -26,6 +26,10 @@ def post_click_rel(hwnd: int, rx: float, ry: float) -> None:
     win32api.PostMessage(hwnd, WM_LBUTTONDOWN, MK_LBUTTON, lparam)
     time.sleep(0.075)
     win32api.PostMessage(hwnd, WM_LBUTTONUP, 0, lparam)
+    time.sleep(0.025)
+    win32api.PostMessage(hwnd, WM_LBUTTONDOWN, MK_LBUTTON, lparam)
+    time.sleep(0.075)
+    win32api.PostMessage(hwnd, WM_LBUTTONUP, 0, lparam)
 
 
 def scroll_down(hwnd: int, rx: float = 0.5, ry: float = 0.5, ticks: int = 3) -> None:

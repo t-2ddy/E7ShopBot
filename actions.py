@@ -37,6 +37,7 @@ async def do_buy(hwnd: int, item_line: wocr.OcrLine) -> None:
 
 
 async def do_scroll(hwnd: int) -> None:
-    """Scroll the shop item list down one page."""
+    """Scroll the shop item list down two pages."""
+    scroll_down(hwnd)
     scroll_down(hwnd)
     await asyncio.sleep(config.DELAY_AFTER_SCROLL)
