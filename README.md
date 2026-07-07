@@ -13,3 +13,7 @@ e7shop2/
 ├── loop.py      — async state machine following the flowchart
 
 └── main.py      — entry point: find window → asyncio.run(run_loop)
+
+
+
+test
