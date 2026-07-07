@@ -42,6 +42,11 @@ def scroll_down(hwnd: int, rx: float = 0.5, ry: float = 0.5, ticks: int = 3) -> 
     cy = int(ry * (bottom - top))
     lparam = (cy << 16) | (cx & 0xFFFF)
 
+    # GLFW uses the last WM_MOUSEMOVE position for wheel events, so post one
+    # first — otherwise scrolling fails when the real cursor is outside the window.
+    win32api.PostMessage(hwnd, WM_MOUSEMOVE, 0, lparam)
+    time.sleep(0.025)
+
     delta = -(WHEEL_DELTA * ticks)
     # wParam: high word = wheel delta, low word = key state (0)
     wparam = (delta & 0xFFFF) << 16

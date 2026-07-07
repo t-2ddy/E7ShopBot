@@ -5,8 +5,12 @@ from actions import do_buy, do_refresh, do_scroll
 from ocr import find_items, ocr_region
 
 
-async def _check_and_buy(hwnd: int) -> bool:
-    """Run OCR on the shop, buy any found items, and return whether anything was bought."""
+async def _check_and_buy(hwnd: int, already_bought: set[str]) -> None:
+    """Run OCR on the shop and buy any found items not already purchased this cycle.
+
+    already_bought is mutated in-place: each keyword bought here is added so it
+    won't be attempted again in a subsequent check within the same refresh cycle.
+    """
     result = await ocr_region(
         hwnd,
         config.OCR_RX1, config.OCR_RY1,
@@ -16,50 +20,41 @@ async def _check_and_buy(hwnd: int) -> bool:
 
     matched = {k: v for k, v in found.items() if v is not None}
     if not matched:
-        return False
+        return
 
-    # Buy in keyword priority order (mystic medal before covenant bookmark)
+    # Buy in keyword priority order; skip anything already bought this cycle
     for keyword in config.ITEM_KEYWORDS:
-        if keyword in matched:
+        if keyword in matched and keyword not in already_bought:
             print(f"[loop] buying: {keyword}")
             await do_buy(hwnd, matched[keyword])
-
-    return True
+            already_bought.add(keyword)
 
 
 async def run_loop(hwnd: int) -> None:
     """Main shop refresh loop.
 
-    Flow:
+    Flow every cycle:
       1. Refresh the shop.
-      2. OCR check — if item(s) found, buy them, then re-check (step 2).
-      3. If none found, scroll down and OCR check again.
-      4. If still none after scroll, go back to step 1 (refresh).
+      2. OCR check top half — buy any found items.
+      3. Scroll down.
+      4. OCR check bottom half — buy any found items.
+      5. Go back to step 1.
 
-    Press Ctrl+C to stop.
+    Press Q or Ctrl+C to stop.
     """
-    print("[loop] starting — press Ctrl+C to stop")
+    print("[loop] starting")
     try:
         while True:
             print("[loop] refreshing shop")
             await do_refresh(hwnd)
+            bought_this_cycle: set[str] = set()
 
-            # First check (top of shop list)
-            bought = await _check_and_buy(hwnd)
-            if bought:
-                # Re-check top of list; items may have shifted after a purchase
-                continue
+            await _check_and_buy(hwnd, bought_this_cycle)
 
-            # Scroll and check bottom of list
-            print("[loop] nothing found at top — scrolling")
+            print("[loop] scrolling to check bottom")
             await do_scroll(hwnd)
 
-            bought = await _check_and_buy(hwnd)
-            if bought:
-                continue
-
-            # Nothing in entire shop — loop back to refresh
-            print("[loop] nothing found — refreshing")
+            await _check_and_buy(hwnd, bought_this_cycle)
 
     except asyncio.CancelledError:
         print("[loop] cancelled")
