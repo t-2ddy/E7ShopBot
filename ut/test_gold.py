@@ -11,7 +11,7 @@ import winsdk.windows.graphics.imaging as wgi
 import winsdk.windows.media.ocr as wocr
 import winsdk.windows.storage.streams as wss
 
-from ocr import _capture_window
+from ocr import _capture_window, _scale_for_ocr
 
 WINDOW_CLASS = "GLFW30"
 WINDOW_TITLE = "Epic Seven"
@@ -31,6 +31,7 @@ async def main() -> None:
 
     img = _capture_window(hwnd, RX1, RY1, RX2, RY2)
     img.save("capture_gold.png")
+    img = _scale_for_ocr(img)
     print("Screenshot saved to capture_gold.png")
 
     buf = io.BytesIO()
@@ -54,11 +55,11 @@ async def main() -> None:
     raw = result.text.strip()
     print(f"OCR raw: {raw!r}")
 
-    # Strip thousands separators and grab the first digit run
+    # Strip thousands separators (commas, dots, spaces) and join all digit groups
     normalized = re.sub(r"[,.]", "", raw)
-    match = re.search(r"\d+", normalized)
-    if match:
-        print(f"Gold: {int(match.group())}")
+    digits = "".join(re.findall(r"\d+", normalized))
+    if digits:
+        print(f"Gold: {int(digits)}")
     else:
         print("Gold: not found")
 
