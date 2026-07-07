@@ -21,4 +21,4 @@ ITEM_KEYWORDS = ["mystic medal", "covenant bookmark"]
 DELAY_AFTER_REFRESH = 2.0
 DELAY_AFTER_BUY     = 1.0
 DELAY_AFTER_SCROLL  = 0.8
-DELAY_CLICK         = 0.1
+DELAY_CLICK         = 0.5
