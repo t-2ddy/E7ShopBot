@@ -1,6 +1,5 @@
 import ctypes
 import io
-import re
 from typing import Optional
 
 import win32gui
@@ -9,8 +8,6 @@ import winsdk.windows.graphics.imaging as wgi
 import winsdk.windows.media.ocr as wocr
 import winsdk.windows.storage.streams as wss
 from PIL import Image
-
-import config
 
 # PW_RENDERFULLCONTENT forces the GPU to render into the bitmap, which is
 # required for hardware-accelerated (OpenGL/DX) windows and works across
@@ -53,16 +50,6 @@ def _capture_window(hwnd: int, rx1: float, ry1: float, rx2: float, ry2: float) -
     cx2 = int(rx2 * cw)
     cy2 = int(ry2 * ch)
     return img.crop((cx1, cy1, cx2, cy2))
-
-
-_OCR_SCALE = 3  # upscale factor; small crops need this for accurate digit recognition
-
-
-def _scale_for_ocr(img: Image.Image, scale: int = _OCR_SCALE) -> Image.Image:
-    """Upscale image by `scale`× with LANCZOS for better OCR accuracy."""
-    if scale <= 1:
-        return img
-    return img.resize((img.width * scale, img.height * scale), Image.LANCZOS)
 
 
 async def ocr_region(
@@ -115,23 +102,3 @@ async def _ocr_image(img: Image.Image) -> wocr.OcrResult:
 
     engine = wocr.OcrEngine.try_create_from_user_profile_languages()
     return await engine.recognize_async(bitmap)
-
-
-async def read_gold(hwnd: int) -> Optional[int]:
-    """OCR the gold counter at the top of the screen and return it as an int.
-
-    The crop is upscaled before OCR for digit accuracy; bounding rects from
-    this result are never used for click positioning, so scaling is safe here.
-
-    Returns None if the region yields no recognisable digit sequence, so callers
-    can choose to skip the check rather than halt on a transient misread.
-    """
-    img = _capture_window(
-        hwnd,
-        config.GOLD_RX1, config.GOLD_RY1,
-        config.GOLD_RX2, config.GOLD_RY2,
-    )
-    result = await _ocr_image(_scale_for_ocr(img))
-    normalized = re.sub(r"[,.]", "", result.text)
-    digits = "".join(re.findall(r"\d+", normalized))
-    return int(digits) if digits else None

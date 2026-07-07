@@ -1,14 +1,24 @@
 import asyncio
+import os
+import sys
 import threading
 
 import customtkinter as ctk
 import win32gui
+from PIL import Image
 
 import config
 from loop import run_loop
 
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("blue")
+
+
+def _resource(rel: str) -> str:
+    """Resolve a bundled resource path, working both from source and inside a
+    PyInstaller-built exe (where files are unpacked to sys._MEIPASS)."""
+    base = getattr(sys, "_MEIPASS", os.path.dirname(os.path.abspath(__file__)))
+    return os.path.join(base, rel)
 
 _FONT         = ("Segoe UI", 13)
 _FONT_BOLD    = ("Segoe UI", 13, "bold")
@@ -26,6 +36,7 @@ class BotStats:
         self.refresh_count = 0
         self.refresh_limit = 0  # 0 = unlimited
         self.purchases: dict[str, int] = {k: 0 for k in config.ITEM_KEYWORDS}
+        self.gold = 0
         self.gold_limiter_enabled = True
         self.running = False
         self.stop_reason = ""
@@ -39,6 +50,15 @@ class App(ctk.CTk):
         self.geometry("360x460")
         self.minsize(320, 400)
         self.resizable(True, True)
+        # customtkinter schedules an internal after(200, ...) call that resets the
+        # titlebar icon to its own default UNLESS iconbitmap()/wm_iconbitmap() was
+        # called (it specifically checks for that, not iconphoto()). So iconbitmap
+        # with a real .ico is required here to stick.
+        self.iconbitmap(_resource("LuaShakeicon.ico"))
+
+        icon_img = Image.open(_resource("LuaShakeicon.png"))
+        icon_w, icon_h = 32, round(32 * icon_img.height / icon_img.width)
+        self._title_icon = ctk.CTkImage(light_image=icon_img, dark_image=icon_img, size=(icon_w, icon_h))
 
         self.stats = BotStats()
         self._bot_thread: threading.Thread | None = None
@@ -51,8 +71,11 @@ class App(ctk.CTk):
     def _build_widgets(self) -> None:
         pad = {"padx": 16, "pady": (8, 0)}
 
-        title = ctk.CTkLabel(self, text="E7 Secret Shop Bot", font=_FONT_TITLE)
-        title.pack(pady=(16, 8))
+        title_frame = ctk.CTkFrame(self, fg_color="transparent")
+        title_frame.pack(pady=(16, 8))
+
+        ctk.CTkLabel(title_frame, image=self._title_icon, text="").pack(side="left", padx=(0, 8))
+        ctk.CTkLabel(title_frame, text="E7 Secret Shop Bot", font=_FONT_TITLE).pack(side="left")
 
         status_frame = ctk.CTkFrame(self)
         status_frame.pack(fill="x", padx=16, pady=(0, 8))
@@ -62,7 +85,14 @@ class App(ctk.CTk):
         )
         self.status_label.pack(side="left", padx=12, pady=8)
 
-        self.start_button = ctk.CTkButton(status_frame, text="Start", font=_FONT_BOLD, command=self._on_start_stop)
+        self.start_button = ctk.CTkButton(
+            status_frame,
+            text="Start",
+            font=_FONT_BOLD,
+            fg_color="#A78BFA",
+            hover_color="#8B5CF6",
+            command=self._on_start_stop,
+        )
         self.start_button.pack(side="right", padx=12, pady=8)
 
         stones_frame = ctk.CTkFrame(self)
@@ -78,7 +108,7 @@ class App(ctk.CTk):
 
         allowed_row = ctk.CTkFrame(stones_frame, fg_color="transparent")
         allowed_row.pack(fill="x", padx=12, pady=2)
-        ctk.CTkLabel(allowed_row, text="Refreshes allowed", font=_FONT).pack(side="left")
+        ctk.CTkLabel(allowed_row, text="Total refreshes", font=_FONT).pack(side="left")
         self.refreshes_allowed_label = ctk.CTkLabel(allowed_row, text="0", font=_FONT)
         self.refreshes_allowed_label.pack(side="right")
         self._on_skystones_change()
@@ -125,7 +155,16 @@ class App(ctk.CTk):
             text=f"Stops at {config.GOLD_MIN:,} gold",
             font=_FONT_SMALL,
             text_color="gray60",
-        ).pack(anchor="w", padx=36, pady=(0, 10))
+        ).pack(anchor="w", padx=36, pady=(0, 4))
+
+        gold_row = ctk.CTkFrame(limiter_frame, fg_color="transparent")
+        gold_row.pack(fill="x", padx=12, pady=(0, 10))
+        ctk.CTkLabel(gold_row, text="Starting gold", font=_FONT).pack(side="left")
+        self.starting_gold_var = ctk.StringVar(value="1000000")
+        self.starting_gold_entry = ctk.CTkEntry(
+            gold_row, width=90, textvariable=self.starting_gold_var, font=_FONT
+        )
+        self.starting_gold_entry.pack(side="right")
 
     def _on_skystones_change(self, *_args) -> None:
         raw = self.skystones_var.get().strip()
@@ -153,8 +192,15 @@ class App(ctk.CTk):
             )
             return
 
+        raw_gold = self.starting_gold_var.get().strip()
+        try:
+            starting_gold = int(raw_gold) if raw_gold else 0
+        except ValueError:
+            starting_gold = 0
+
         self.stats.refresh_count = 0
         self.stats.purchases = {k: 0 for k in config.ITEM_KEYWORDS}
+        self.stats.gold = starting_gold
         self.stats.stop_reason = ""
         self.stats.running = True
 
@@ -189,9 +235,9 @@ class App(ctk.CTk):
         if not self.stats.running and self.start_button.cget("text") == "Stop":
             self.start_button.configure(text="Start")
             if self.stats.stop_reason == "gold limit":
-                self.status_label.configure(text="\u25cf Stopped (gold limit)", text_color="red")
+                self.status_label.configure(text="\u25cf Stopped (gold limit)", text_color="pink")
             elif self.stats.stop_reason == "refresh limit":
-                self.status_label.configure(text="\u25cf Stopped (refresh limit)", text_color="orange")
+                self.status_label.configure(text="\u25cf Stopped (refresh limit)", text_color="violet")
             else:
                 self.status_label.configure(text="\u25cf Idle", text_color="gray60")
 

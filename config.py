@@ -17,11 +17,13 @@ OCR_RX2, OCR_RY2 = 1.0, 1.0
 # Target item keywords (lowercase); order determines buy priority when both present
 ITEM_KEYWORDS = ["mystic medal", "covenant bookmark"]
 
-# Gold OCR region (calibrated via ut/test_gold.py)
-GOLD_RX1, GOLD_RY1 = 0.50, 0.05
-GOLD_RX2, GOLD_RY2 = 0.70, 0.13
+# Hardcoded gold cost per item (used to track remaining gold locally)
+ITEM_COSTS = {
+    "mystic medal": 280_000,
+    "covenant bookmark": 184_000,
+}
 
-# Stop the bot if gold drops below this threshold
+# Stop the bot if tracked gold drops below this threshold
 GOLD_MIN = 300_000
 
 # Timing (seconds)

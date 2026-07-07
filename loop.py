@@ -2,7 +2,7 @@ import asyncio
 
 import config
 from actions import do_buy, do_refresh, do_scroll
-from ocr import find_items, ocr_region, read_gold
+from ocr import find_items, ocr_region
 
 
 async def _check_and_buy(hwnd: int, already_bought: set[str], stats=None) -> None:
@@ -31,6 +31,7 @@ async def _check_and_buy(hwnd: int, already_bought: set[str], stats=None) -> Non
             already_bought.add(keyword)
             if stats is not None:
                 stats.purchases[keyword] = stats.purchases.get(keyword, 0) + 1
+                stats.gold -= config.ITEM_COSTS.get(keyword, 0)
 
 
 async def run_loop(hwnd: int, stats=None) -> None:
@@ -47,18 +48,20 @@ async def run_loop(hwnd: int, stats=None) -> None:
     refresh/purchase counts and the reason the loop stopped, and controls
     whether the gold limiter and refresh limit are enforced.
 
+    Gold is tracked locally rather than read from the screen: stats.gold starts
+    at a user-entered value and is decremented by config.ITEM_COSTS on each
+    purchase. Without stats (e.g. the CLI entry point), there is no gold value
+    to track, so the gold limiter has no effect.
+
     Press Q or Ctrl+C to stop.
     """
     print("[loop] starting")
     try:
         while True:
-            if stats is None or stats.gold_limiter_enabled:
-                gold = await read_gold(hwnd)
-                if gold is not None and gold < config.GOLD_MIN:
-                    print(f"[loop] gold {gold:,} < {config.GOLD_MIN:,}, stopping")
-                    if stats is not None:
-                        stats.stop_reason = "gold limit"
-                    break
+            if stats is not None and stats.gold_limiter_enabled and stats.gold < config.GOLD_MIN:
+                print(f"[loop] gold {stats.gold:,} < {config.GOLD_MIN:,}, stopping")
+                stats.stop_reason = "gold limit"
+                break
 
             if stats is not None and stats.refresh_limit > 0 and stats.refresh_count >= stats.refresh_limit:
                 print(f"[loop] refresh limit {stats.refresh_limit} reached, stopping")
