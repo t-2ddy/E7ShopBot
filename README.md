@@ -16,7 +16,7 @@ Windows helper for **Epic Seven** that refreshes the in-game **Secret Shop** and
 
 ## Important To Note
 - **Do not minimize the game** It should be open and the text in the shop should be a "readable" size (about 1/4 or 1/5 screen size is good)
-- E7 can be behind other windows or games and run fine
+- E7 can be behind other windows or games and the bot will run fine
 - Try not to run an auto farm in the background, e7 sends large data objects to its servers from your client(game) and on run completions stutters which can interupt the bot
 
 
