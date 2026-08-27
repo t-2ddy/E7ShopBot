@@ -4,6 +4,11 @@ Windows helper for **Epic Seven** that refreshes the in-game **Secret Shop** and
 
 [Download the prebuilt](https://drive.google.com/file/d/1bpG2I4HBYqQMVKjS-PAUq3GkNtGKlNnp/view?usp=sharing) `.exe`
 
+## Demo (old version demo, features are still the same)
+
+<img width="426" height="240" alt="490850390-c1134679-fed4-495e-ab40-450e05b199a9" src="https://github.com/user-attachments/assets/3234db06-2272-4a28-9a5a-b52b084e96a2" />
+
+
 ## Quick Start
 1) Open epic seven and move to secret shop
 2) Open app **AS ADMIN** (because stove opens the game with higher permissions)
