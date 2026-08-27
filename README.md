@@ -1,5 +1,7 @@
 # auto-shop
 
+[Download here](https://drive.google.com/file/d/1bpG2I4HBYqQMVKjS-PAUq3GkNtGKlNnp/view?usp=sharing)
+
 auto-shop/
 
 ├── config.py    — all tunable constants (coords, timing, keywords)
