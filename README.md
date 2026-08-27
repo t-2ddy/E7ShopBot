@@ -4,6 +4,17 @@ Windows helper for **Epic Seven** that refreshes the in-game **Secret Shop** and
 
 [Download the prebuilt](https://drive.google.com/file/d/1bpG2I4HBYqQMVKjS-PAUq3GkNtGKlNnp/view?usp=sharing) `.exe`
 
+## Quick Start
+1) Open epic seven and move to secret shop
+2) Open app **AS ADMIN** (because stove opens the game with higher permissions)
+3) Set the skystones (and gold) and run the bot
+
+## Important To Note
+- **Do not minimize the game** It should be open and the text in the shop should be a "readable" size (about 1/4 or 1/5 screen size is good)
+- E7 can be behind other windows or games and run fine
+- Try not to run an auto farm in the background, e7 sends large data objects to its servers from your client(game) and on run completions stutters which can interupt the bot
+
+
 ## Requirements
 
 - Windows 10/11 (Win32 messages + Windows OCR)
