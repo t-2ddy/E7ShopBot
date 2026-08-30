@@ -16,12 +16,12 @@ Windows helper for **Epic Seven** that refreshes the in-game **Secret Shop** and
 
 ## Important To Note
 - **Do not minimize the game** It should be open and the text in the shop should be a "readable" size (about 1/4 or 1/5 screen size is good)
+- **Do not let your pc fall alseep** OCR uses the physical graphics to know what is in the shop to buy, the bot will continue running if your computer falls asleep and will not buy anything
 - E7 can be behind other windows or games and the bot will run fine
-- Try not to run an auto farm in the background, e7 sends large data objects to its servers from your client(game) and on run completions stutters which can interupt the bot
+- ~~Try not to run an auto farm in the background, e7 sends large data objects to its servers from your client(game) and on run completions stutters which can interupt the bot~~ (fixed with most recent server side only background battles update)
 
 
-## Requirements
-
+## Requirements for building from source
 - Windows 10/11 (Win32 messages + Windows OCR)
 - Epic Seven running (window title `Epic Seven`, class `GLFW30`)
 - Python 3.10+ if running from source
