@@ -16,9 +16,15 @@ ctk.set_default_color_theme("blue")
 
 def _resource(rel: str) -> str:
     """Resolve a bundled resource path, working both from source and inside a
-    PyInstaller-built exe (where files are unpacked to sys._MEIPASS)."""
-    base = getattr(sys, "_MEIPASS", os.path.dirname(os.path.abspath(__file__)))
-    return os.path.join(base, rel)
+    PyInstaller-built exe (where files are unpacked to sys._MEIPASS).
+
+    Icons live at the repo root (one level above this file) when running from
+    source; the frozen build unpacks them next to the exe payload.
+    """
+    if getattr(sys, "_MEIPASS", None):
+        return os.path.join(sys._MEIPASS, rel)
+    repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    return os.path.join(repo_root, rel)
 
 _FONT         = ("Segoe UI", 13)
 _FONT_BOLD    = ("Segoe UI", 13, "bold")

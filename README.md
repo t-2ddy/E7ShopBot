@@ -35,14 +35,14 @@ python -m venv .venv
 pip install customtkinter pywin32 winsdk Pillow
 ```
 
-There is no `requirements.txt` in the repo; those four packages are the runtime deps (`gui.py` plus OCR/input).
+There is no `requirements.txt` in the repo; those four packages are the runtime deps (`windows/gui.py` plus OCR/input).
 
 ## Run
 
 Leave Epic Seven open (NOT minimized, but on another monitor is fine and behind other windows is okay). Then either launch the downloaded `E7ShopBot.exe`, or:
 
 ```powershell
-python gui.py
+python windows/gui.py
 ```
 
 1. Set **Skystones to spend**. The app divides by 3 (cost per refresh) and shows **Total refreshes**.
@@ -55,16 +55,16 @@ Live stats: refreshes done, purchase counts per item, and a stop reason (refresh
 CLI (no GUI, no gold/refresh limits; press `Q` to stop):
 
 ```powershell
-python main.py
+python windows/main.py
 ```
 
-If the game window is not found, the GUI shows "Window not found" and the CLI exits. Run `python find_window.py` to print visible Epic Seven hwnd / title / class.
+If the game window is not found, the GUI shows "Window not found" and the CLI exits. Run `python windows/find_window.py` to print visible Epic Seven hwnd / title / class.
 
 ### Build the exe
 
 ```powershell
 pip install pyinstaller
-pyinstaller E7ShopBot.spec
+pyinstaller windows/E7ShopBot.spec
 ```
 
 Output: `dist/E7ShopBot.exe` (windowed, icons from `LuaShakeicon.ico` / `LuaShakeicon.png`).
@@ -81,9 +81,9 @@ Find Epic Seven hwnd
 → repeat until refresh limit, gold floor, or Stop
 ```
 
-- **Clicks/scrolls** (`input.py`): `PostMessage` `WM_MOUSEMOVE` + `WM_LBUTTONDOWN/UP` / `WM_MOUSEWHEEL` to the game hwnd. GLFW uses the last posted mouse position, so the physical cursor is left alone.
-- **Capture** (`ocr.py`): `PrintWindow(PW_RENDERFULLCONTENT)` so GPU/OpenGL windows work on any monitor (plain screen grab is black).
-- **Buy** (`actions.py`): Buy button X is a fixed relative coord (`BUY_BUTTON_RX`); Y comes from the matched OCR line.
+- **Clicks/scrolls** (`windows/input.py`): `PostMessage` `WM_MOUSEMOVE` + `WM_LBUTTONDOWN/UP` / `WM_MOUSEWHEEL` to the game hwnd. GLFW uses the last posted mouse position, so the physical cursor is left alone.
+- **Capture** (`windows/ocr.py`): `PrintWindow(PW_RENDERFULLCONTENT)` so GPU/OpenGL windows work on any monitor (plain screen grab is black).
+- **Buy** (`windows/actions.py`): Buy button X is a fixed relative coord (`BUY_BUTTON_RX`); Y comes from the matched OCR line.
 - **Gold** is not read from the screen. You enter a starting amount; each buy subtracts a hardcoded cost. Without the GUI `stats` object (CLI), the gold limiter does nothing.
 
 
@@ -95,21 +95,21 @@ Find Epic Seven hwnd
 
 Gold limiter default floor: **300,000**. Toggle it off in the GUI if you don't want that stop.
 
-Tunable coords, delays, keywords, and costs live in `config.py` (all click positions are 0.0–1.0 of the client area).
+Tunable coords, delays, keywords, and costs live in `windows/config.py` (all click positions are 0.0–1.0 of the client area).
 
 ## Harness scripts
 
-Scripts under `ut/` talk to a live Epic Seven window. Run them from the repo root (`python ut/test_buy.py`).
+Scripts under `windows/ut/` talk to a live Epic Seven window. Run them from the repo root (`python windows/ut/test_buy.py`).
 
 
-| Script              | Purpose                                      |
-| ------------------- | -------------------------------------------- |
-| `find_window.py`    | List visible Epic Seven hwnd / title / class |
-| `ut/test_click.py`  | Calibrate relative clicks                    |
-| `ut/test_scroll.py` | Repeat `scroll_down` until `Q`               |
-| `ut/test_text.py`   | Capture + OCR the right half of the client   |
-| `ut/test_buy.py`    | OCR a target row and click its Buy button    |
-| `ut/test_gold.py`   | Experiment: crop/OCR the gold readout        |
+| Script                      | Purpose                                      |
+| --------------------------- | -------------------------------------------- |
+| `windows/find_window.py`    | List visible Epic Seven hwnd / title / class |
+| `windows/ut/test_click.py`  | Calibrate relative clicks                    |
+| `windows/ut/test_scroll.py` | Repeat `scroll_down` until `Q`               |
+| `windows/ut/test_text.py`   | Capture + OCR the right half of the client   |
+| `windows/ut/test_buy.py`    | OCR a target row and click its Buy button    |
+| `windows/ut/test_gold.py`   | Experiment: crop/OCR the gold readout        |
 
 
 
@@ -127,15 +127,16 @@ Scripts under `ut/` talk to a live Epic Seven window. Run them from the repo roo
 ## Project layout
 
 ```text
-gui.py           # CustomTkinter app (primary entry)
-main.py          # CLI entry: find window → run_loop, Q to stop
-loop.py          # refresh → OCR/buy → scroll → OCR/buy
-actions.py       # do_refresh / do_buy / do_scroll
-ocr.py           # PrintWindow capture + Windows OCR
-input.py         # Win32 click + scroll primitives
-config.py        # coords, timing, keywords, item costs
-find_window.py   # list Epic Seven windows
-ut/              # live-window calibration harnesses
-E7ShopBot.spec   # PyInstaller build
+windows/gui.py           # CustomTkinter app (primary entry)
+windows/main.py          # CLI entry: find window → run_loop, Q to stop
+windows/loop.py          # refresh → OCR/buy → scroll → OCR/buy
+windows/actions.py       # do_refresh / do_buy / do_scroll
+windows/ocr.py           # PrintWindow capture + Windows OCR
+windows/input.py         # Win32 click + scroll primitives
+windows/config.py        # coords, timing, keywords, item costs
+windows/find_window.py   # list Epic Seven windows
+windows/ut/              # live-window calibration harnesses
+windows/E7ShopBot.spec   # PyInstaller build (if present)
+LuaShakeicon.ico/.png    # app icons (repo root)
 ```
 

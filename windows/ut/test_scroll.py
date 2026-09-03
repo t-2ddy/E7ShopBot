@@ -1,10 +1,11 @@
 import msvcrt
 import sys
 import time
+from pathlib import Path
 
 import win32gui
 
-sys.path.insert(0, "..")
+sys.path.insert(0, str(Path(__file__).parent.parent))
 from config import WINDOW_CLASS, WINDOW_TITLE
 from input import scroll_down
 

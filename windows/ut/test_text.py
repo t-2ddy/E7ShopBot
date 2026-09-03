@@ -2,7 +2,11 @@ import asyncio
 import io
 import re
 import sys
+from pathlib import Path
+
 import win32gui
+
+sys.path.insert(0, str(Path(__file__).parent.parent))
 import winsdk.windows.media.ocr as wocr
 import winsdk.windows.graphics.imaging as wgi
 import winsdk.windows.storage.streams as wss

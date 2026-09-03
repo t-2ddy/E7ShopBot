@@ -1,8 +1,10 @@
 import asyncio
 import sys
+from pathlib import Path
 
 import win32gui
 
+sys.path.insert(0, str(Path(__file__).parent.parent))
 from config import WINDOW_CLASS, WINDOW_TITLE, OCR_RX1, OCR_RY1, OCR_RX2, OCR_RY2
 from ocr import _capture_window, ocr_region, find_items
 from input import post_click_rel
