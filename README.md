@@ -18,6 +18,7 @@ Windows helper for **Epic Seven** that refreshes the in-game **Secret Shop** and
 - **Do not minimize the game** It should be open and the text in the shop should be a "readable" size (about 1/4 or 1/5 screen size is good)
 - **Do not let your pc fall alseep** OCR uses the physical graphics to know what is in the shop to buy, the bot will continue running if your computer falls asleep and will not buy anything
 - E7 can be behind other windows or games and the bot will run fine
+- Don't move your mouse over the game while it is refreshing, the position of the clicks sent to the game will be overridden by your actual mouse!!!!!!!
 - ~~Try not to run an auto farm in the background, e7 sends large data objects to its servers from your client(game) and on run completions stutters which can interupt the bot~~ (fixed with most recent server side only background battles update)
 
 
